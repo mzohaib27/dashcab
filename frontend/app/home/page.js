@@ -7,14 +7,19 @@ import Image from "next/image";
 import { RiArrowDownWideFill } from "react-icons/ri";
 import Navbar from "../[components]/Navbar";
 import LocationPanel from "../[components]/LocationPanel";
+import { useRouter } from "next/navigation";
+import LiveMap from "../[components]/Livemap";
 
 const Home = () => {
+  const router = useRouter();
+
   const [isActive, setIsActive] = useState(false);
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
 
   const submitHandler = (e) => {
     e.preventDefault();
+    router.push("/home/book-ride");
   };
   return (
     <ProtectedWrapper>
@@ -27,7 +32,7 @@ const Home = () => {
             onSubmit={submitHandler}
             className="flex flex-col gap-4 relative"
           >
-            <div className="absolute top-[8.5rem] left-4 h-5 w-1 rounded-full bg-white" />
+            <div className="absolute top-[8.5rem] left-4 h-6 w-1 rounded-full bg-white" />
             <h1 className="text-5xl font-semibold py-4">Find a Trip</h1>
             <input
               type="text"
@@ -85,11 +90,7 @@ const Home = () => {
           className="w-1/2 flex items-center justify-center"
           onClick={() => setIsActive(false)}
         >
-          <Image
-            src={women}
-            alt="image"
-            className="w-80 h-120 bg-cover rounded-3xl shadow-xl shadow-red-600"
-          />
+          <LiveMap pickup={pickup} destination={destination} />
         </div>
       </div>
     </ProtectedWrapper>
