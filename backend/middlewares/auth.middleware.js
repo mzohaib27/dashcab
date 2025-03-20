@@ -24,6 +24,7 @@ const handleAuthError = (error, res) => {
 
 module.exports.authUser = async (req, res, next) => {
   const token = extractToken(req);
+  console.log(token);
 
   if (!token || typeof token !== "string") {
     return res

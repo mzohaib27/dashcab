@@ -1,11 +1,18 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Loader from "../[components]/Loader";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { CaptainDataContext } from "../[context]/captainContext";
 
 const CaptainSignup = () => {
+  const router = useRouter();
+
+  const { captainData, setCaptainData } = useContext(CaptainDataContext);
+
   const [loading, setLoading] = useState(false);
-  const [captainData, setCaptainData] = useState({
+  const [captainProfileData, setCaptainProfileData] = useState({
     fullName: {
       firstName: "",
       lastName: "",
@@ -20,27 +27,30 @@ const CaptainSignup = () => {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      console.log(captainData);
-      setCaptainData({
-        fullName: {
-          firstName: "",
-          lastName: "",
-        },
-        email: "",
-        password: "",
-        vehicle: {
-          color: "",
-          plate: "",
-          capacity: "",
-          vehicleType: "",
-        },
-      });
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4500/api/captains/register",
+        captainProfileData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log(response.data);
+      if (response.status === 201) {
+        const data = response.data;
+        sessionStorage.setItem("captain", JSON.stringify(data));
+        setCaptainData(data.captain);
+        router.push("/captain-home");
+      }
+    } catch (error) {
       setLoading(false);
-    }, 5000);
+      console.log(`Error while log in captain, Error is : ${error}`);
+    }
   };
   return (
     <div className="min-h-screen w-full flex flex-col gap-4 items-start justify-center p-12 bg-image">
@@ -63,32 +73,40 @@ const CaptainSignup = () => {
             <input
               type="text"
               required
-              value={captainData.fullName.firstName}
+              value={captainProfileData.fullName.firstName}
               onChange={(e) =>
-                setCaptainData({
-                  ...captainData,
+                setCaptainProfileData({
+                  ...captainProfileData,
                   fullName: {
-                    ...captainData.fullName,
+                    ...captainProfileData.fullName,
                     firstName: e.target.value,
                   },
                 })
               }
               placeholder="First Name"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              aria-autocomplete="none"
               className="px-4 py-2 rounded-xl w-1/2 focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900"
             />
             <input
               type="text"
-              value={captainData.fullName.lastName}
+              value={captainProfileData.fullName.lastName}
               onChange={(e) =>
-                setCaptainData({
-                  ...captainData,
+                setCaptainProfileData({
+                  ...captainProfileData,
                   fullName: {
-                    ...captainData.fullName,
+                    ...captainProfileData.fullName,
                     lastName: e.target.value,
                   },
                 })
               }
               placeholder="Last Name"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              aria-autocomplete="none"
               className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-1/2"
             />
           </div>
@@ -101,11 +119,18 @@ const CaptainSignup = () => {
           <input
             type="email"
             required
-            value={captainData.email}
+            value={captainProfileData.email}
             onChange={(e) =>
-              setCaptainData({ ...captainData, email: e.target.value })
+              setCaptainProfileData({
+                ...captainProfileData,
+                email: e.target.value,
+              })
             }
             placeholder="youremail@example.com"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="relative px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
 
@@ -118,11 +143,18 @@ const CaptainSignup = () => {
           <input
             type="password"
             required
-            value={captainData.password}
+            value={captainProfileData.password}
             onChange={(e) =>
-              setCaptainData({ ...captainData, password: e.target.value })
+              setCaptainProfileData({
+                ...captainProfileData,
+                password: e.target.value,
+              })
             }
             placeholder="your password"
+            autoComplete="new-password"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <h1 className="text-xl flex items-center gap-2">
@@ -139,17 +171,21 @@ const CaptainSignup = () => {
                 <input
                   type="text"
                   required
-                  value={captainData.vehicle.color}
+                  value={captainProfileData.vehicle.color}
                   onChange={(e) =>
-                    setCaptainData({
-                      ...captainData,
+                    setCaptainProfileData({
+                      ...captainProfileData,
                       vehicle: {
-                        ...captainData.vehicle,
+                        ...captainProfileData.vehicle,
                         color: e.target.value,
                       },
                     })
                   }
                   placeholder="Vehicle Color"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  aria-autocomplete="none"
                   className="px-4 py-2 rounded-xl w-full focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900"
                 />
               </div>
@@ -160,17 +196,21 @@ const CaptainSignup = () => {
                 <h1 className="text-xs">Plate Number</h1>
                 <input
                   type="text"
-                  value={captainData.vehicle.plate}
+                  value={captainProfileData.vehicle.plate}
                   onChange={(e) =>
-                    setCaptainData({
-                      ...captainData,
+                    setCaptainProfileData({
+                      ...captainProfileData,
                       vehicle: {
-                        ...captainData.vehicle,
+                        ...captainProfileData.vehicle,
                         plate: e.target.value,
                       },
                     })
                   }
                   placeholder="Plate Number"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  aria-autocomplete="none"
                   className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
                 />
               </div>
@@ -184,17 +224,21 @@ const CaptainSignup = () => {
                 <input
                   type="Number"
                   required
-                  value={captainData.vehicle.capacity}
+                  value={captainProfileData.vehicle.capacity}
                   onChange={(e) =>
-                    setCaptainData({
-                      ...captainData,
+                    setCaptainProfileData({
+                      ...captainProfileData,
                       vehicle: {
-                        ...captainData.vehicle,
-                        capacity: e.target.value,
+                        ...captainProfileData.vehicle,
+                        capacity: Number(e.target.value),
                       },
                     })
                   }
                   placeholder="Capacity"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  aria-autocomplete="none"
                   className="px-4 py-2 rounded-xl w-full focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900"
                 />
               </div>
@@ -203,21 +247,45 @@ const CaptainSignup = () => {
                   *
                 </span>
                 <h1 className="text-xs">Vehicle Type</h1>
-                <input
+                {/* <input
                   type="text"
-                  value={captainData.vehicle.vehicleType}
+                  value={captainProfileData.vehicle.vehicleType}
                   onChange={(e) =>
-                    setCaptainData({
-                      ...captainData,
+                    setCaptainProfileData({
+                      ...captainProfileData,
                       vehicle: {
-                        ...captainData.vehicle,
+                        ...captainProfileData.vehicle,
                         vehicleType: e.target.value,
                       },
                     })
                   }
                   placeholder="Type of Vehicle"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  aria-autocomplete="none"
                   className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
-                />
+                /> */}
+                <select
+                  required
+                  className="px-4 py-3  rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-57 text-sm text-white/70"
+                  value={captainProfileData.vehicle.vehicleType}
+                  onChange={(e) =>
+                    setCaptainProfileData({
+                      ...captainProfileData,
+                      vehicle: {
+                        ...captainProfileData.vehicle,
+                        vehicleType: e.target.value,
+                      },
+                    })
+                  }
+                >
+                  <option value="" disabled>
+                    Select Vehicle Type
+                  </option>
+                  <option value="Car">Car</option>
+                  <option value="Motorcycle">Motorcycle</option>
+                </select>
               </div>
             </div>
           </div>

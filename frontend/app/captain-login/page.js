@@ -1,27 +1,45 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Loader from "../[components]/Loader";
+import { UserDataContext } from "../[context]/userContext";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { CaptainDataContext } from "../[context]/captainContext";
 
 const CaptainLogin = () => {
+  const router = useRouter();
+
+  const { captainData, setCaptainData } = useContext(CaptainDataContext);
+
   const [loading, setLoading] = useState(false);
-  const [captainData, setCaptainData] = useState({
+  const [captainCredentials, setCaptainCredentials] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
-      console.log(captainData);
-      setCaptainData({
-        email: "",
-        password: "",
-      });
+    try {
+      const response = await axios.post(
+        "http://localhost:4500/api/captains/login",
+        captainCredentials,
+        {
+          withCredentials: true,
+        }
+      );
+
+      const data = response.data;
+      sessionStorage.setItem("captain", JSON.stringify(data));
+      setCaptainData(data.captainInfo);
       setLoading(false);
-    }, 3000);
+      router.push("/captain-home");
+    } catch (error) {
+      setLoading(false);
+      console.log(`Error while log in captain, Error is : ${error}`);
+    }
   };
 
   return (
@@ -46,11 +64,18 @@ const CaptainLogin = () => {
           <input
             type="email"
             required
-            value={captainData.email}
+            value={captainCredentials.email}
             onChange={(e) =>
-              setCaptainData({ ...captainData, email: e.target.value })
+              setCaptainCredentials({
+                ...captainCredentials,
+                email: e.target.value,
+              })
             }
             placeholder="youremail@example.com"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <h1 className="text-xl md:text-3xl relative">
@@ -62,11 +87,18 @@ const CaptainLogin = () => {
           <input
             type="password"
             required
-            value={captainData.password}
+            value={captainCredentials.password}
             onChange={(e) =>
-              setCaptainData({ ...captainData, password: e.target.value })
+              setCaptainCredentials({
+                ...captainCredentials,
+                password: e.target.value,
+              })
             }
             placeholder="your password"
+            autoComplete="new-password"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <button className="w-full px-6 py-2 mt-2 rounded-xl bg-red-600 text-white text-sm md:text-base font-semibold hover-effect hover:shadow-md hover:shadow-white">

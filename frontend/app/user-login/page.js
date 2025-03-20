@@ -1,26 +1,47 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Loader from "../[components]/Loader";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { UserDataContext } from "../[context]/userContext";
 
 const UserLogin = () => {
+  const router = useRouter();
+
+  const { user, setUser } = useContext(UserDataContext);
+
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      console.log(userData);
-      setUserData({
-        email: "",
-        password: "",
-      });
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4500/api/users/login",
+        userData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log(response.data);
+      if (response.status === 200) {
+        const data = response.data;
+        setUser(data.userInfo);
+        sessionStorage.setItem("user", JSON.stringify(data));
+        setLoading(false);
+        router.push("/home");
+      }
+    } catch (error) {
       setLoading(false);
-    }, 5000);
+      console.log(`Error while log in user, Error is : ${error.message}`);
+    }
   };
   return (
     <div className="min-h-screen w-full flex flex-col gap-4 items-start justify-center pl-6 bg-image">
@@ -49,6 +70,10 @@ const UserLogin = () => {
               setUserData({ ...userData, email: e.target.value })
             }
             placeholder="youremail@example.com"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <h1 className="text-xl md:text-3xl relative">
@@ -65,6 +90,10 @@ const UserLogin = () => {
               setUserData({ ...userData, password: e.target.value })
             }
             placeholder="your password"
+            autoComplete="new-password"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <button

@@ -1,9 +1,16 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Loader from "../[components]/Loader";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { UserDataContext } from "../[context]/userContext";
 
 const UserSignup = () => {
+  const router = useRouter();
+
+  const { user, setUser } = useContext(UserDataContext);
+
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({
     fullName: {
@@ -14,21 +21,28 @@ const UserSignup = () => {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      console.log(userData);
-      setUserData({
-        fullName: {
-          firstName: "",
-          lastName: "",
-        },
-        email: "",
-        password: "",
-      });
+    try {
+      const response = await axios.post(
+        "http://localhost:4500/api/users/register",
+        userData,
+        { withCredentials: true }
+      );
+      console.log(response.data);
+
+      if (response.status === 201) {
+        const data = response.data;
+        setUser(data.user);
+        sessionStorage.setItem("user", JSON.stringify(data));
+        setLoading(false);
+        router.push("/home");
+      }
+    } catch (error) {
       setLoading(false);
-    }, 5000);
+      console.log(`Error while creating account, Error is : ${error}`);
+    }
   };
   return (
     <div className="min-h-screen w-full flex flex-col gap-4 items-start justify-center p-12 bg-image">
@@ -45,7 +59,7 @@ const UserSignup = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <h1>What's your Name?</h1>
           <div className="flex gap-4 relative">
-            <span className="absolute top-[-40%] left-54 text-red-500 text-md">
+            <span className="absolute top-[-40%] left-73 text-red-500 text-md">
               *
             </span>
             <input
@@ -59,6 +73,10 @@ const UserSignup = () => {
                 })
               }
               placeholder="First Name"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              aria-autocomplete="none"
               className="px-4 py-2 rounded-xl w-1/2 focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900"
             />
             <input
@@ -71,6 +89,10 @@ const UserSignup = () => {
                 })
               }
               placeholder="Last Name"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
+              aria-autocomplete="none"
               className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-1/2"
             />
           </div>
@@ -88,6 +110,10 @@ const UserSignup = () => {
               setUserData({ ...userData, email: e.target.value })
             }
             placeholder="youremail@example.com"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <h1 className="text-xl relative  ">
@@ -104,13 +130,17 @@ const UserSignup = () => {
               setUserData({ ...userData, password: e.target.value })
             }
             placeholder="your password"
+            autoComplete="new-password"
+            autoCorrect="off"
+            spellCheck="false"
+            aria-autocomplete="none"
             className="px-4 py-2 rounded-xl focus:outline-none focus:shadow-md focus:shadow-red-600 placeholder:text-sm bg-gray-900 w-full"
           />
           <button
             type="submit"
             className="w-full px-6 py-2 mt-2 rounded-xl bg-red-600 text-white text-sm md:text-base font-semibold hover-effect hover:shadow-md hover:shadow-white"
           >
-            Sign up
+            Create Account
           </button>
         </form>
         <Link

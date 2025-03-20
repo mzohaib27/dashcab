@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import UserContext from "./[context]/userContext";
+import CaptainContext from "./[context]/captainContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +24,9 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-black to-[#0f1010] text-white`}
       >
-        {children}
+        <UserContext>
+          <CaptainContext>{children}</CaptainContext>
+        </UserContext>
       </body>
     </html>
   );

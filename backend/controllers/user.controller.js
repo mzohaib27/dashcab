@@ -28,6 +28,9 @@ module.exports.registerUser = async function (req, res, next) {
   });
 
   const token = await newUser.generateAuthToken();
+  res.cookie("token", token, {
+    httpOnly: true,
+  });
 
   const { password: _, ...user } = newUser._doc;
 
@@ -60,7 +63,7 @@ module.exports.loginUser = async (req, res, next) => {
   }
 
   const token = await user.generateAuthToken();
-  res.cookie("token", token);
+  // res.cookie("token", token);
 
   const { password: _, ...userInfo } = user._doc;
 
